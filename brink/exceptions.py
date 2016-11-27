@@ -1,4 +1,5 @@
-from aiohttp.web import HTTPBadRequest, HTTPUnauthorized, HTTPNotFound
+from aiohttp.web import (HTTPBadRequest, HTTPUnauthorized, HTTPNotFound,
+                         HTTPForbidden)
 
 
 class UndefinedSchema(Exception):
@@ -15,4 +16,3 @@ class ValidationError(Exception):
 class UnexpectedDbResponse(Exception):
 
     pass
-
