@@ -190,6 +190,11 @@ class ListField(Field):
             return []
         return data
 
+    def show(self, data):
+        if data is None:
+            return []
+        return [self.field_type.show(val) for val in data]
+
     def validate(self, data):
         data = data or []
         for item in data:

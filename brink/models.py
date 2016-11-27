@@ -156,7 +156,7 @@ class Model(object, metaclass=ModelBase):
         if self._state.get("id"):
             query = query \
                 .get(self._state.get("id")) \
-                .replace(self.__db_repr, return_changes=True)
+                .update(self.__db_repr, return_changes=True)
         else:
             query = query \
                 .insert(self.__db_repr, return_changes=True)
@@ -170,6 +170,11 @@ class Model(object, metaclass=ModelBase):
                 self.wrap(resp["changes"][0]["new_val"])
         except KeyError:
             raise UnexpectedDbResponse()
+
+        if resp["skipped"] > 0:
+            raise UnexpectedDbResponse(
+                "Model with id `%s` not found in the database." %
+                self._state.get("id"))
 
         return self
 
