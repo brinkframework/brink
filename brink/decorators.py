@@ -3,9 +3,9 @@ import asyncio
 
 def require_request_model(cls, *args, validate=True, **kwargs):
     """
-    Makes a handler require that a request body that map towards the given model
-    is provided. Unless the ``validate`` option is set to ``False`` the data will
-    be validated against the model's fields.
+    Makes a handler require that a request body that map towards the given
+    model is provided. Unless the ``validate`` option is set to ``False`` the
+    data will be validated against the model's fields.
 
     The model will be passed to the handler as the last positional argument. ::
 

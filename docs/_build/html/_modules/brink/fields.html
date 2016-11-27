@@ -145,11 +145,13 @@
   <h1>Source code for brink.fields</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">sys</span>
 
+
 <div class="viewcode-block" id="FieldError"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.FieldError">[docs]</a><span class="k">class</span> <span class="nc">FieldError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    FieldError base class. All field errors inherit from this exception class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
+
 
 <div class="viewcode-block" id="FieldRequired"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.FieldRequired">[docs]</a><span class="k">class</span> <span class="nc">FieldRequired</span><span class="p">(</span><span class="n">FieldError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -157,11 +159,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
 
+
 <div class="viewcode-block" id="FieldInvalidType"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.FieldInvalidType">[docs]</a><span class="k">class</span> <span class="nc">FieldInvalidType</span><span class="p">(</span><span class="n">FieldError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Thrown whenever a value of an invalid type is provided to the field.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
+
 
 <div class="viewcode-block" id="FieldInvalidLength"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.FieldInvalidLength">[docs]</a><span class="k">class</span> <span class="nc">FieldInvalidLength</span><span class="p">(</span><span class="n">FieldError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -169,7 +173,28 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Field"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.Field">[docs]</a><span class="k">class</span> <span class="nc">Field</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<span class="k">def</span> <span class="nf">validator</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Marks a field method as a validator, and thus it will be executed whenever</span>
+<span class="sd">    ``validate`` is called on the field.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">m</span>
+
+
+<span class="k">class</span> <span class="nc">FieldBase</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validators</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s2">&quot;validator&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">validator</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Field"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.Field">[docs]</a><span class="k">class</span> <span class="nc">Field</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">FieldBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Field base class. All other fields inherit from this class, so usually you</span>
 <span class="sd">    want to use one of the more specialized fields. However, there might be</span>
@@ -177,20 +202,37 @@
 <span class="sd">    any other standard field, and in that case you could use Field to store any</span>
 <span class="sd">    value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hidden</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pk</span> <span class="o">=</span> <span class="n">pk</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="n">required</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hidden</span> <span class="o">=</span> <span class="n">hidden</span>
 
-    <span class="k">def</span> <span class="nf">treat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">data</span>
+<div class="viewcode-block" id="Field.treat"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.Field.treat">[docs]</a>    <span class="k">def</span> <span class="nf">treat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        All field values will be passed through this method before being</span>
+<span class="sd">        saved to the database. Thus, you can make any final modifications</span>
+<span class="sd">        to the value here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">k</span><span class="p">[:</span><span class="mi">9</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;validate_&quot;</span><span class="p">:</span>
-                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">)(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+<div class="viewcode-block" id="Field.show"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.Field.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        All field values will be passed through this method before being</span>
+<span class="sd">        rendered as json. Thus you can perform any desired modifications to the</span>
+<span class="sd">        final output here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
+<div class="viewcode-block" id="Field.validate"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.Field.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs all field validators.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+    <span class="nd">@validator</span>
 <div class="viewcode-block" id="Field.validate_required"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.Field.validate_required">[docs]</a>    <span class="k">def</span> <span class="nf">validate_required</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validates that a value is present if the field is required.</span>
@@ -198,6 +240,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldRequired</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">data</span></div></div>
+
 
 <div class="viewcode-block" id="IntegerField"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.IntegerField">[docs]</a><span class="k">class</span> <span class="nc">IntegerField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -207,12 +250,14 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="nd">@validator</span>
     <span class="k">def</span> <span class="nf">validate_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldInvalidType</span><span class="p">()</span></div>
+
 
 <div class="viewcode-block" id="CharField"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.CharField">[docs]</a><span class="k">class</span> <span class="nc">CharField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -224,6 +269,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">=</span> <span class="n">max_length</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="nd">@validator</span>
     <span class="k">def</span> <span class="nf">validate_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
@@ -231,6 +277,7 @@
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldInvalidType</span><span class="p">()</span>
 
+    <span class="nd">@validator</span>
     <span class="k">def</span> <span class="nf">validate_min_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">):</span>
             <span class="k">return</span>
@@ -238,12 +285,14 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_length</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldInvalidLength</span><span class="p">()</span>
 
+    <span class="nd">@validator</span>
     <span class="k">def</span> <span class="nf">validate_max_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">):</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldInvalidLength</span><span class="p">()</span></div>
+
 
 <div class="viewcode-block" id="PasswordField"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.PasswordField">[docs]</a><span class="k">class</span> <span class="nc">PasswordField</span><span class="p">(</span><span class="n">CharField</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -254,6 +303,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="BooleanField"><a class="viewcode-back" href="../../fields_ref.html#brink.fields.BooleanField">[docs]</a><span class="k">class</span> <span class="nc">BooleanField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BooleanField is suitable to hold boolean values.</span>
@@ -262,12 +312,14 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="nd">@validator</span>
     <span class="k">def</span> <span class="nf">validate_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldInvalidType</span><span class="p">()</span></div>
+
 
 <span class="k">class</span> <span class="nc">ListField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -277,6 +329,11 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">field_type</span> <span class="o">=</span> <span class="n">field_type</span>
+
+    <span class="k">def</span> <span class="nf">treat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="ow">or</span> <span class="p">[]</span>

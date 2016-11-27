@@ -143,50 +143,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-brink.models">
-<span id="models"></span><h1>Models<a class="headerlink" href="#module-brink.models" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="brink.models.Model">
-<em class="property">class </em><code class="descclassname">brink.models.</code><code class="descname">Model</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/models.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.models.Model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Model is to be subclassed by all application models. An arbitrary dictionary
-can be provided upon initialization like so</p>
-<p><code class="docutils literal"><span class="pre">Model({&quot;key&quot;:</span> <span class="pre">&quot;value&quot;})</span></code></p>
-<p>which would be the equivalent of this</p>
-<p><code class="docutils literal"><span class="pre">Model().wrap({&quot;key&quot;:</span> <span class="pre">&quot;value&quot;})</span></code></p>
-<dl class="method">
-<dt id="brink.models.Model.delete">
-<code class="descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/models.html#Model.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.models.Model.delete" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes the model from the database.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="brink.models.Model.fields">
-<code class="descname">fields</code><a class="headerlink" href="#brink.models.Model.fields" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provides an iterable for all model fields.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="brink.models.Model.save">
-<code class="descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/models.html#Model.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.models.Model.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>Persists the model to the database. If the model holds no primary key,
-a new one will automatically created by RethinkDB. Otherwise it will
-overwrite the current model persisted to the database.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="brink.models.Model.validate">
-<code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/models.html#Model.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.models.Model.validate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Validates all field values for the model.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="brink.models.Model.wrap">
-<code class="descname">wrap</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/models.html#Model.wrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.models.Model.wrap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wraps and consumes an arbitrary dictionary into the model.</p>
-</dd></dl>
-
-</dd></dl>
-
+  <div class="section" id="models">
+<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
