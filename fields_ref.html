@@ -158,6 +158,28 @@ cases where you wanna store an arbitrary value that does not fit well into
 any other standard field, and in that case you could use Field to store any
 value.</p>
 <dl class="method">
+<dt id="brink.fields.Field.show">
+<code class="descname">show</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/fields.html#Field.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.fields.Field.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>All field values will be passed through this method before being
+rendered as json. Thus you can perform any desired modifications to the
+final output here.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brink.fields.Field.treat">
+<code class="descname">treat</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/fields.html#Field.treat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.fields.Field.treat" title="Permalink to this definition">¶</a></dt>
+<dd><p>All field values will be passed through this method before being
+saved to the database. Thus, you can make any final modifications
+to the value here.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brink.fields.Field.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/fields.html#Field.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.fields.Field.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs all field validators.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="brink.fields.Field.validate_required">
 <code class="descname">validate_required</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/fields.html#Field.validate_required"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.fields.Field.validate_required" title="Permalink to this definition">¶</a></dt>
 <dd><p>Validates that a value is present if the field is required.</p>

@@ -149,13 +149,36 @@ convenient way.</p>
 <span class="target" id="module-brink.decorators"></span><dl class="function">
 <dt id="brink.decorators.require_request_model">
 <code class="descclassname">brink.decorators.</code><code class="descname">require_request_model</code><span class="sig-paren">(</span><em>cls</em>, <em>*args</em>, <em>*</em>, <em>validate=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/decorators.html#require_request_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.decorators.require_request_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Makes a handler require that a request body that map towards the given model
-is provided. Unless the <code class="docutils literal"><span class="pre">validate</span></code> option is set to <code class="docutils literal"><span class="pre">False</span></code> the data will
-be validated against the model&#8217;s fields.</p>
+<dd><p>Makes a handler require that a request body that map towards the given
+model is provided. Unless the <code class="docutils literal"><span class="pre">validate</span></code> option is set to <code class="docutils literal"><span class="pre">False</span></code> the
+data will be validated against the model&#8217;s fields.</p>
 <p>The model will be passed to the handler as the last positional argument.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@require_request_model</span><span class="p">(</span><span class="n">Model</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_model</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
     <span class="k">return</span> <span class="mi">200</span><span class="p">,</span> <span class="n">model</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="brink.decorators.use_ws_subhandlers">
+<code class="descclassname">brink.decorators.</code><code class="descname">use_ws_subhandlers</code><span class="sig-paren">(</span><em>handler</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/brink/decorators.html#use_ws_subhandlers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#brink.decorators.use_ws_subhandlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows the handler to return any number of <strong>subhandlers</strong> that will be
+run in parallel. This makes it much cleaner and easier to write a handler
+that both listens for incoming messages on the socket connection, while
+also watching a changefeed from RethinkDB.</p>
+<p>Example usage</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@use_ws_subhandlers</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">handle_feed</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">ws</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_incoming</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">ws</span><span class="p">):</span>
+        <span class="k">async</span> <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">Item</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">msg</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_change</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">ws</span><span class="p">):</span>
+        <span class="k">async</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="k">await</span> <span class="n">Item</span><span class="o">.</span><span class="n">changes</span><span class="p">():</span>
+            <span class="n">ws</span><span class="o">.</span><span class="n">send_json</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">handle_incoming</span><span class="p">,</span> <span class="n">handle_change</span><span class="p">]</span>
 </pre></div>
 </div>
 </dd></dl>

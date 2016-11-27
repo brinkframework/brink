@@ -143,11 +143,14 @@
            <div itemprop="articleBody">
             
   <h1>Source code for brink.decorators</h1><div class="highlight"><pre>
-<div class="viewcode-block" id="require_request_model"><a class="viewcode-back" href="../../decorators_ref.html#brink.decorators.require_request_model">[docs]</a><span></span><span class="k">def</span> <span class="nf">require_request_model</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+
+
+<div class="viewcode-block" id="require_request_model"><a class="viewcode-back" href="../../decorators_ref.html#brink.decorators.require_request_model">[docs]</a><span class="k">def</span> <span class="nf">require_request_model</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Makes a handler require that a request body that map towards the given model</span>
-<span class="sd">    is provided. Unless the ``validate`` option is set to ``False`` the data will</span>
-<span class="sd">    be validated against the model&#39;s fields.</span>
+<span class="sd">    Makes a handler require that a request body that map towards the given</span>
+<span class="sd">    model is provided. Unless the ``validate`` option is set to ``False`` the</span>
+<span class="sd">    data will be validated against the model&#39;s fields.</span>
 
 <span class="sd">    The model will be passed to the handler as the last positional argument. ::</span>
 
@@ -167,6 +170,41 @@
         <span class="k">return</span> <span class="n">new_handler</span>
     <span class="k">return</span> <span class="n">decorator</span></div>
 
+
+<div class="viewcode-block" id="use_ws_subhandlers"><a class="viewcode-back" href="../../decorators_ref.html#brink.decorators.use_ws_subhandlers">[docs]</a><span class="k">def</span> <span class="nf">use_ws_subhandlers</span><span class="p">(</span><span class="n">handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows the handler to return any number of **subhandlers** that will be</span>
+<span class="sd">    run in parallel. This makes it much cleaner and easier to write a handler</span>
+<span class="sd">    that both listens for incoming messages on the socket connection, while</span>
+<span class="sd">    also watching a changefeed from RethinkDB.</span>
+
+<span class="sd">    Example usage ::</span>
+
+<span class="sd">        @use_ws_subhandlers</span>
+<span class="sd">        async def handle_feed(request, ws):</span>
+<span class="sd">            async def handle_incoming(_, ws):</span>
+<span class="sd">                async for msg in ws:</span>
+<span class="sd">                    await Item(value=msg.data).save()</span>
+
+<span class="sd">            async def handle_change(_, ws):</span>
+<span class="sd">                async for item in await Item.changes():</span>
+<span class="sd">                    ws.send_json(item)</span>
+
+<span class="sd">            return [handle_incoming, handle_change]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">new_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">ws</span><span class="p">):</span>
+        <span class="n">handlers</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">ws</span><span class="p">)</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">h</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">ws</span><span class="p">))</span>
+                 <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">handlers</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+
+            <span class="k">await</span> <span class="n">ws</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">new_handler</span></div>
 </pre></div>
 
            </div>
