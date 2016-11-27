@@ -10,3 +10,16 @@ def resolve_func(func_string):
         raise ImportError(name=func_name, path=func_strung)
 
     return func
+
+
+def get_config():
+    conf = importlib.import_module("config")
+    return conf
+
+
+def get_app_models(app):
+    # TODO: Fix ugly workaround
+    from brink.models import Model, ModelBase
+    module = importlib.import_module("%s.models" % app)
+    return [model for _, model in module.__dict__.items()
+            if isinstance(model, ModelBase) and model is not Model]

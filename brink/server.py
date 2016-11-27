@@ -3,6 +3,7 @@ from brink.config import config
 from brink.db import conn
 from brink.handlers import __handler_wrapper, __ws_handler_wrapper
 from brink.utils import resolve_func
+from brink.cli import print_globe, print_info
 import importlib
 import aiohttp_autoreload
 import logging
@@ -29,8 +30,10 @@ def run_server(conf):
 
     # Enable source code auto reload on change only if DEBUG is enabled
     if config.get("DEBUG"):
-        aiohttp_autoreload.add_reload_hook(lambda:
-                                           print("\nDetected code change. Reloading...\n"))
+        aiohttp_autoreload.add_reload_hook(
+            lambda: print_info("Detected code change. Reloading...",
+                               spaced=True))
+
         aiohttp_autoreload.start()
 
         logger.setLevel(logging.DEBUG)
@@ -41,7 +44,7 @@ def run_server(conf):
 
     server.make_handler(access_log=logger)
     port = config.get("PORT", 8888)
-    print("🌍  Server listening on port %s\n" % port)
+    print_globe("Server listening on port %s\n" % port)
     web.run_app(server, port=port, print=lambda *args: None)
 
 

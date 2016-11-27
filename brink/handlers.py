@@ -1,9 +1,11 @@
 from aiohttp import web
+
 from brink.serialization import json_dumps
 from brink.exceptions import HTTPBadRequest
 
 
 class WebSocketResponse(web.WebSocketResponse):
+
     def send_json(self, json, *args, **kwargs):
         super().send_json(json, *args, dumps=json_dumps, **kwargs)
 
@@ -22,4 +24,3 @@ def __ws_handler_wrapper(handler):
         await handler(request, ws)
         return ws
     return new_handler
-

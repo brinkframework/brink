@@ -1,5 +1,7 @@
 import rethinkdb as r
 
+from brink.utils import get_config
+
 
 class Connection(object):
     """
@@ -21,3 +23,19 @@ class Connection(object):
         )
 
 conn = Connection()
+
+
+def get_sync_conn():
+    config = get_config()
+    return r.connect(**config.DATABASE or {})
+
+
+def sync_model(model):
+    try:
+        r.table_create(model.table_name).run(get_sync_conn())
+        return "Created table `%s`" % model.table_name
+    except r.ReqlOpFailedError as e:
+        if "already exists" in e.message:
+            return "Table `%s` already exists" % model.table_name
+        else:
+            raise Exception("An unexpected error occured")

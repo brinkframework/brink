@@ -10,7 +10,8 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 setup(
     name="brink",
     version="0.2.2",
-    description="A simple real time web framework based on aiohttp and RethinkDB.",
+    description="A simple real time web framework based on\
+            aiohttp and RethinkDB.",
     long_description=long_description,
     url="https://github.com/lohmander/brink",
     author="CH Lohmander",
@@ -33,7 +34,7 @@ setup(
     packages=find_packages(exclude=["contrib", "docs", "tests"]),
 
     install_requires=["aiohttp", "aiohttp_autoreload",
-                      "rethinkdb", "inflection"],
+                      "rethinkdb", "inflection", "pycolor"],
 
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],

@@ -1,9 +1,11 @@
+import rethinkdb as r
 from inflection import tableize
+
 from brink.db import conn
 from brink.object_manager import ObjectManager
-from brink.exceptions import UndefinedSchema, UnexpectedDbResponse, ValidationError
 from brink.fields import Field
-import rethinkdb as r
+from brink.exceptions import (
+    UndefinedSchema, UnexpectedDbResponse, ValidationError)
 
 
 class ModelMeta(object):
@@ -49,8 +51,8 @@ class ModelBase(type):
 
 class Model(object, metaclass=ModelBase):
     """
-    Model is to be subclassed by all application models. An arbitrary dictionary
-    can be provided upon initialization like so
+    Model is to be subclassed by all application models. An arbitrary
+    dictionary can be provided upon initialization like so
 
     ``Model({"key": "value"})``
 

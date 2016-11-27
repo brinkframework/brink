@@ -1,6 +1,6 @@
-from brink.db import conn
 import rethinkdb as r
-import copy
+
+from brink.db import conn
 
 
 class ObjectManager(object):

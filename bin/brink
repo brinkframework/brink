@@ -1,10 +1,5 @@
 #!/usr/bin/python
 
-from brink.server import run_server
-from brink.models import ModelBase, Model
-from string import Template
-from subprocess import call
-import rethinkdb as r
 import argparse
 import os
 import sys
@@ -12,12 +7,24 @@ import signal
 import glob
 import importlib
 import itertools
+from string import Template
+from subprocess import call
+
+import rethinkdb as r
+
+from brink.server import run_server
+from brink.models import ModelBase, Model
+from brink.utils import get_app_models
+from brink.db import sync_model
+from brink.cli import (print_success, print_monkey, print_msg, print_done,
+                       print_error)
 
 
 def rm_db_container():
     print("Removing RethinkDB container...")
     call(["docker", "stop", "rethinkdb"])
     call(["docker", "rm", "rethinkdb"])
+
 
 def run_docker(args):
     project_name = os.path.basename(os.getcwd())
@@ -53,6 +60,7 @@ def run_docker(args):
     if args.db:
         rm_db_container()
 
+
 def run(args):
     if args.docker:
         run_docker(args)
@@ -67,6 +75,7 @@ def run(args):
 
     run_server(config)
 
+
 def build(args):
     project_name = os.path.basename(os.getcwd())
 
@@ -79,26 +88,32 @@ def build(args):
 
 def start_project(args):
     if args.name == "test":
-        print("😞  Unfortunately `test` is not a valid project name. Try something else.")
+        print("😞  Unfortunately `test` is not a valid project name.\
+                Try something else.")
         return
 
-    template_dir = os.path.abspath("%s/../../template" % __file__ )
+    template_dir = os.path.abspath("%s/../../template" % __file__)
 
-    include_docker = input("Do you want to include a Dockerfile? [y/n] ") == "y"
+    include_docker = input(
+        "Do you want to include a Dockerfile? [y/n] ") == "y"
     print("-----\n")
 
     # Create the basic project folder structure
     os.makedirs("%s/%s" % (args.name, args.name))
 
     # Render files and copy them over to the project
-    files = itertools.chain(glob.iglob("%s/**/*" % template_dir, recursive=True),
-                            glob.iglob("%s/**/.*" % template_dir, recursive=True))
+    files = itertools.chain(
+        glob.iglob("%s/**/*" % template_dir, recursive=True),
+        glob.iglob("%s/**/.*" % template_dir, recursive=True))
+
     for filename in files:
         if os.path.isfile(filename):
             with open(filename) as file:
                 file_raw = file.read()
-                file_content = Template(file_raw).safe_substitute(name=args.name)
-                new_path = filename.replace(template_dir, "").replace("name", args.name)
+                file_content = Template(
+                    file_raw).safe_substitute(name=args.name)
+                new_path = filename.replace(
+                    template_dir, "").replace("name", args.name)
                 filename_only = os.path.basename(filename)
 
                 if not include_docker and filename_only == "Dockerfile":
@@ -123,25 +138,15 @@ def sync_db(args):
     conn = r.connect(**config.DATABASE or {})
 
     for app in config.INSTALLED_APPS:
-        print("Syncing models for `%s`:" % app)
+        print_msg("Syncing models for `%s`:" % app, spaced=True)
+
         try:
-            module = importlib.import_module("%s.models" % app)
+            for model in get_app_models(app):
+                print_success(sync_model(model), indent=4)
         except ModuleNotFoundError:
-            print("  🙊  No models found\n")
-            continue
+            print_monkey("No models found here", indent=4)
 
-        for v in vars(module):
-            var = getattr(module, v)
-
-            if isinstance(var, ModelBase) and var is not Model:
-                try:
-                    r.table_create(var.table_name).run(conn)
-                    print("  ✅  Created table `%s`" % var.table_name)
-                except r.ReqlOpFailedError:
-                    print("  ✅  Table `%s` already exists" % var.table_name)
-        print("")
-
-    print("Done 👍")
+    print_done(spaced=True)
 
 
 def __get_config():
@@ -149,29 +154,39 @@ def __get_config():
     import config
     return config
 
+
 def __missing_config():
-    print("❌  No config.py file found in the current directory.")
-    print("\nMake sure to be in the project root directory when starting the Brink server.")
+    print_error("No config.py file found in the current directory.")
+    print_msg(("Make sure to be in the project root directory when"
+               "starting the Brink server."), spaced=True)
 
 
 # Setup CLI arguments
-parser = argparse.ArgumentParser(description="Command line utility for the Brink Framework.")
+parser = argparse.ArgumentParser(
+    description="Command line utility for the Brink Framework.")
 
 subparsers = parser.add_subparsers(help="Available commands")
 
 parser_run = subparsers.add_parser("run", help="Runs Brink project locally")
-parser_run.add_argument("--docker", action="store_true", help="Run inside Docker")
-parser_run.add_argument("--db", action="store_true", help="Run RethinkDB inside Docker and link it to the Brink container")
-parser_run.add_argument("--debug", action="store_true", help="Set DEBUG flag to True")
+parser_run.add_argument("--docker", action="store_true",
+                        help="Run inside Docker")
+parser_run.add_argument("--db", action="store_true",
+                        help="Run RethinkDB inside Docker and\
+                                link it to the Brink container")
+parser_run.add_argument("--debug", action="store_true",
+                        help="Set DEBUG flag to True")
 parser_run.set_defaults(func=run)
 
-parser_build = subparsers.add_parser("build", help="Run a Docker build of the current project")
+parser_build = subparsers.add_parser(
+    "build", help="Run a Docker build of the current project")
 parser_build.set_defaults(func=build)
 
-parser_syncdb = subparsers.add_parser("sync-db", help="Creates tables and indexes in the database")
+parser_syncdb = subparsers.add_parser(
+    "sync-db", help="Creates tables and indexes in the database")
 parser_syncdb.set_defaults(func=sync_db)
 
-parser_start_project = subparsers.add_parser("start-project", help="Start a new Brink project")
+parser_start_project = subparsers.add_parser(
+    "start-project", help="Start a new Brink project")
 parser_start_project.add_argument("name", help="The name of your project")
 parser_start_project.set_defaults(func=start_project)
 
@@ -179,4 +194,3 @@ parser_start_project.set_defaults(func=start_project)
 if __name__ == "__main__":
     args = parser.parse_args()
     args.func(args)
-
