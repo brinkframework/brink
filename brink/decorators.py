@@ -1,7 +1,7 @@
 import asyncio
 
 
-def require_request_model(cls, *args, validate=True, **kwargs):
+def require_request_model(cls, validate=True):
     """
     Makes a handler require that a request body that map towards the given
     model is provided. Unless the ``validate`` option is set to ``False`` the
@@ -14,14 +14,14 @@ def require_request_model(cls, *args, validate=True, **kwargs):
             return 200, model
     """
     def decorator(handler):
-        async def new_handler(request):
+        async def new_handler(request, *args, **kwargs):
             body = await request.json()
             model = cls(**body)
 
             if validate:
                 model.validate()
 
-            return await handler(request, *args, model, **kwargs)
+            return await handler(request, model, *args, **kwargs)
         return new_handler
     return decorator
 
