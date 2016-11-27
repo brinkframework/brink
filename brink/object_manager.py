@@ -88,12 +88,11 @@ class ObjectSet(object):
 
         if (await self.cursor.fetch_next()):
             data = await self.cursor.next()
-            model_cls = copy.deepcopy(self.model_cls)
 
             if self.returns_changes:
                 data = data["new_val"]
 
-            model = model_cls(**data)
+            model = self.model_cls(**data)
 
             return model
         else:

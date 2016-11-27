@@ -7,7 +7,7 @@ def resolve_func(func_string):
     func = getattr(module, func_name)
 
     if not func:
-        raise ImportError(name=func_name, path=func_strung)
+        raise ImportError(name=func_name, path=func_string)
 
     return func
 
