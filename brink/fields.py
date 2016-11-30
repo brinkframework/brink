@@ -200,3 +200,18 @@ class ListField(Field):
         for item in data:
             self.field_type.validate(item)
         return data
+
+
+class ReferenceField(Field):
+
+    def __init__(self, model_ref_type, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.model_ref_type = model_ref_type
+
+    def treat(self, data):
+        if not hasattr(data, "id") or data is None:
+            return data
+        return data.id
+
+    def validate(self, data):
+        pass
