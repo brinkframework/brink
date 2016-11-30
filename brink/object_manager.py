@@ -25,7 +25,7 @@ class QuerySet(object):
         self.single = False
         self.returns_changes = False
         self.non_model_res = False
-        self.integrate = ["*"]
+        self.resolve = ["*"]
 
     def __await__(self):
         return self.__run().__await__()
@@ -42,7 +42,7 @@ class QuerySet(object):
 
     async def __run(self):
         if not self.non_model_res:
-            self.query = self.query.map(self.__integrate_references())
+            self.query = self.query.map(self.__resolve_references())
 
         res = await self.query.run(await conn.get())
 
@@ -57,16 +57,16 @@ class QuerySet(object):
                 returns_changes=self.returns_changes
             )
 
-    def __should_integrate(self, name):
-        return name in self.integrate or "*" in self.integrate
+    def __should_resolve(self, name):
+        return name in self.resolve or "*" in self.resolve
 
-    def __integrate_references(self):
+    def __resolve_references(self):
         def mapper(doc):
             map = {}
 
             for name, field in self.model_cls._meta.fields.items():
                 if isinstance(field, ReferenceField) \
-                        and self.__should_integrate(name) \
+                        and self.__should_resolve(name) \
                         and doc[name]:
                     table_name = field.model_ref_type.table_name
                     map[name] = r.table(table_name).get(doc[name])
@@ -90,8 +90,8 @@ class QuerySet(object):
         self.single = False
         return self
 
-    def integrate(self, *args):
-        self.integrate = args
+    def resolve(self, *args):
+        self.resolve = args
         return self
 
     async def as_list(self):
