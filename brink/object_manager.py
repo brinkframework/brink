@@ -1,6 +1,7 @@
 import rethinkdb as r
 
 from brink.db import conn
+from brink.fields import ReferenceField
 
 
 class ObjectManager(object):
@@ -24,6 +25,7 @@ class QuerySet(object):
         self.single = False
         self.returns_changes = False
         self.non_model_res = False
+        self.integrate = ["*"]
 
     def __await__(self):
         return self.__run().__await__()
@@ -39,7 +41,11 @@ class QuerySet(object):
         return proxy
 
     async def __run(self):
+        if not self.non_model_res:
+            self.query = self.query.map(self.__integrate_references())
+
         res = await self.query.run(await conn.get())
+
         if self.non_model_res:
             return res
         elif self.single:
@@ -50,6 +56,25 @@ class QuerySet(object):
                 res,
                 returns_changes=self.returns_changes
             )
+
+    def __should_integrate(self, name):
+        return name in self.integrate or "*" in self.integrate
+
+    def __integrate_references(self):
+        def mapper(doc):
+            map = {}
+
+            for name, field in self.model_cls._meta.fields.items():
+                if isinstance(field, ReferenceField) \
+                        and self.__should_integrate(name) \
+                        and doc[name]:
+                    table_name = field.model_ref_type.table_name
+                    map[name] = r.table(table_name).get(doc[name])
+                else:
+                    map[name] = doc[name]
+
+            return map
+        return mapper
 
     def get(self, id):
         self.query = self.query.get(id)
@@ -63,6 +88,10 @@ class QuerySet(object):
         self.query = self.query.changes(*args, **kwargs)
         self.returns_changes = True
         self.single = False
+        return self
+
+    def integrate(self, *args):
+        self.integrate = args
         return self
 
     async def as_list(self):

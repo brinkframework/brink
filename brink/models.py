@@ -3,7 +3,7 @@ from inflection import tableize
 
 from brink.db import conn
 from brink.object_manager import ObjectManager
-from brink.fields import Field
+from brink.fields import Field, ReferenceField
 from brink.exceptions import (
     UndefinedSchema, UnexpectedDbResponse, ValidationError)
 
@@ -82,7 +82,6 @@ class Model(object, metaclass=ModelBase):
     def __setattr__(self, attr, value):
         if attr in [key for key, _ in self.fields]:
             self._state[attr] = self._meta.fields[attr].validate(value)
-            print(attr, self._state[attr])
         else:
             super().__setattr__(attr, value)
 
@@ -119,7 +118,11 @@ class Model(object, metaclass=ModelBase):
         """
         for name, field in self.fields:
             try:
-                self._state[name] = data[name]
+                if isinstance(field, ReferenceField) \
+                        and type(data[name]) is dict:
+                    self._state[name] = field.model_ref_type(**data[name])
+                else:
+                    self._state[name] = data[name]
             except KeyError:
                 self._state[name] = None
 
