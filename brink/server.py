@@ -60,10 +60,13 @@ def __add_route(server, url, package):
     handler_wrapper = __ws_handler_wrapper if method == "WS" \
         else __handler_wrapper
 
-    try:
-        handler_func = resolve_func(handler)
-    except ModuleNotFoundError:
-        handler_func = resolve_func("%s.%s" % (package, handler))
+    if type(handler) is str:
+        try:
+            handler_func = resolve_func(handler)
+        except ModuleNotFoundError:
+            handler_func = resolve_func("%s.%s" % (package, handler))
+    else:
+        handler_func = handler
 
     handler_func = handler_wrapper(handler_func)
 
