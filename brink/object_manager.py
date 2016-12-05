@@ -49,7 +49,9 @@ class QuerySet(object):
         if self.non_model_res:
             return res
         elif self.single:
-            return self.model_cls(**res)
+            model_instance = self.model_cls(**await res.next())
+            res.close()
+            return model_instance
         else:
             return ObjectSet(
                 self.model_cls,
@@ -76,8 +78,13 @@ class QuerySet(object):
             return map
         return mapper
 
+    def delete(self):
+        self.query = self.query.delete()
+        self.non_model_res = True
+        return self
+
     def get(self, id):
-        self.query = self.query.get(id)
+        self.query = self.query.get_all(id)
         self.single = True
         return self
 
@@ -125,4 +132,5 @@ class ObjectSet(object):
 
             return model
         else:
+            self.cursor.close()
             raise StopAsyncIteration
