@@ -1,6 +1,6 @@
 # Brink Framework
 
-[![Build Status](https://travis-ci.org/lohmander/brink.svg?branch=feature%2Fmodel-rewrite)](https://travis-ci.org/lohmander/brink)
+[![Build Status](https://travis-ci.org/brinkframework/brink.svg?branch=master)](https://travis-ci.org/brinkframework/brink)
 
 ## Installation
 
