@@ -1,7 +1,11 @@
+import importlib
+import re
+
 from aiohttp import web
 
 from brink.serialization import json_dumps
 from brink.exceptions import HTTPBadRequest
+from brink.config import config
 
 
 class WebSocketResponse(web.WebSocketResponse):
@@ -24,3 +28,27 @@ def __ws_handler_wrapper(handler):
         await handler(request, ws)
         return ws
     return new_handler
+
+
+def __get_url_params(url):
+    return re.findall(r"{(.*?)}", url)
+
+
+async def handle_list_urls(request):
+    apps = config.get("INSTALLED_APPS", default=[])
+    endpoints = []
+
+    for app in apps:
+        try:
+            urls = importlib.import_module("%s.urls" % app)
+
+            for (method, url, _) in urls.urls:
+                endpoints.append({
+                    "method": method,
+                    "url": url,
+                    "url_params": __get_url_params(url),
+                })
+        except ModuleNotFoundError as e:
+            continue
+
+    return 200, {"data": endpoints}
