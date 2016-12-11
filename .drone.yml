@@ -1,0 +1,4 @@
+build:
+  image: python:3.6
+  commands:
+    - python setup.py test
