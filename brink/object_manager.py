@@ -71,9 +71,10 @@ class QuerySet(object):
                         and self.__should_resolve(name) \
                         and doc[name]:
                     table_name = field.model_ref_type.table_name
-                    map[name] = r.table(table_name).get(doc[name])
+                    map[name] = r.table(table_name).get(
+                        doc[name].default(None))
                 else:
-                    map[name] = doc[name]
+                    map[name] = doc[name].default(None)
 
             return map
         return mapper
