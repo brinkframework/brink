@@ -1,7 +1,7 @@
 import rethinkdb as r
 
 from brink.db import conn
-from brink.fields import ReferenceField
+from brink.fields import ReferenceField, ReferenceListField
 
 
 class ObjectManager(object):
@@ -71,8 +71,14 @@ class QuerySet(object):
                         and self.__should_resolve(name) \
                         and doc[name]:
                     table_name = field.model_ref_type.table_name
-                    map[name] = r.table(table_name).get(
-                        doc[name].default(None))
+
+                    if isinstance(field, ReferenceListField):
+                        map[name] = doc[name].default([]).map(
+                            lambda id: r.table(table_name).get(id))
+                    else:
+                        map[name] = r.table(table_name).get(
+                            doc[name].default(None))
+
                 else:
                     map[name] = doc[name].default(None)
 

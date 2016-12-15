@@ -218,5 +218,31 @@ class ReferenceField(Field):
             return data
         return data.id
 
+    def show(self, data):
+        return self.model_ref_type(**data)
+
     def validate(self, data):
+        return data
+
+
+class ReferenceListField(ReferenceField):
+    """
+    Holds a list of references to other model instances. It may or may not
+    be resolved once the field data is fetched.
+    """
+
+    def treat(self, data):
+        if data is None:
+            return []
+        return [item.id for item in data]
+
+    def show(self, data):
+        if data is None:
+            return []
+        return [self.model_ref_type(**item) for item in data]
+
+    def validate(self, data):
+        data = data or []
+        for item in data:
+            super().validate(item)
         return data
