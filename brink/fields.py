@@ -219,4 +219,4 @@ class ReferenceField(Field):
         return data.id
 
     def validate(self, data):
-        pass
+        return data
