@@ -203,6 +203,11 @@ class ListField(Field):
 
 
 class ReferenceField(Field):
+    """
+    Holds a reference to another model. Will be represented as the other
+    object's id in the database, and later possibly resolved as it is fetched
+    from the database.
+    """
 
     def __init__(self, model_ref_type, *args, **kwargs):
         super().__init__(*args, **kwargs)
