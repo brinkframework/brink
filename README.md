@@ -1,6 +1,6 @@
 # Brink Framework
 
-[![Build Status](https://travis-ci.org/brinkframework/brink.svg?branch=master)](https://travis-ci.org/brinkframework/brink)
+[![wercker status](https://app.wercker.com/status/5d9f35bec3b8fff14f91a81e2c957d6a/s/master "wercker status")](https://app.wercker.com/project/byKey/5d9f35bec3b8fff14f91a81e2c957d6a)
 
 ## Installation
 

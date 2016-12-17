@@ -70,6 +70,9 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# rethink
+rethinkdb_data
+
 # pyenv
 .python-version
 

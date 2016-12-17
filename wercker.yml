@@ -1,4 +1,6 @@
 box: python:3.6
+services:
+  - rethinkdb
 build:
   steps:
     - script:
