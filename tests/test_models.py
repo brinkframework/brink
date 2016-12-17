@@ -31,30 +31,36 @@ def loop():
     loop.close()
 
 
-def test_setup_table(loop):
-    async def do_setup_table():
-        try:
-            await r.table_create(Rabbit.table_name).run(await conn.get())
-            await r.table_create(Turtle.table_name).run(await conn.get())
-        except:
-            pass
-        finally:
-            await conn.close()
+def test_random_asyncio(loop):
+    async def do_wait():
+        await asyncio.sleep(5)
 
-    loop.run_until_complete(do_setup_table())
+    loop.run_until_complete(do_wait())
 
-
-def test_destroy_table(loop):
-    async def do_destroy_table():
-        try:
-            await r.table_drop(Rabbit.table_name).run(await conn.get())
-            await r.table_drop(Turtle.table_name).run(await conn.get())
-        except:
-            pass
-        finally:
-            await conn.close()
-
-    loop.run_until_complete(do_destroy_table())
+# def test_setup_table(loop):
+#     async def do_setup_table():
+#         try:
+#             await r.table_create(Rabbit.table_name).run(await conn.get())
+#             await r.table_create(Turtle.table_name).run(await conn.get())
+#         except:
+#             pass
+#         finally:
+#             await conn.close()
+#
+#     loop.run_until_complete(do_setup_table())
+#
+#
+# def test_destroy_table(loop):
+#     async def do_destroy_table():
+#         try:
+#             await r.table_drop(Rabbit.table_name).run(await conn.get())
+#             await r.table_drop(Turtle.table_name).run(await conn.get())
+#         except:
+#             pass
+#         finally:
+#             await conn.close()
+#
+#     loop.run_until_complete(do_destroy_table())
 
 # @pytest.mark.asyncio
 # async def test_save():
