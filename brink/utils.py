@@ -25,4 +25,5 @@ def get_app_models(app):
     return [model for _, model in module.__dict__.items()
             if isinstance(model, ModelBase) and
             model is not Model and
+            not getattr(model, "prevent_sync") and
             model.__module__ == module_name]

@@ -8,6 +8,11 @@ from brink.exceptions import (
     UndefinedSchema, UnexpectedDbResponse, ValidationError)
 
 
+def prevent_sync(model):
+    setattr(model, "prevent_sync", True)
+    return model
+
+
 class ModelMeta(object):
 
     def __init__(self):
