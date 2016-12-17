@@ -77,7 +77,7 @@ class QuerySet(object):
                             lambda id: r.table(table_name).get(id))
                     else:
                         map[name] = r.table(table_name).get(
-                            doc[name].default(None))
+                            doc[name].default(0))
 
                 else:
                     map[name] = doc[name].default(None)
