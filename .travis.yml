@@ -1,4 +1,6 @@
 language: python
 python:
   - "3.6-dev"
+addons:
+  rethinkdb: '2.3'
 script: python setup.py test

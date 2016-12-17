@@ -8,6 +8,9 @@ class Connection(object):
     Connection provides an instance of the rethinkdb connection object.
     """
 
+    def __init__(self):
+        self.config = {}
+
     def setup(self, config):
         """
         Setups the database configuartion and sets the RethinkDB loop type to

@@ -63,6 +63,12 @@ class Field(object, metaclass=FieldBase):
         self.required = required
         self.hidden = hidden
 
+    def consume(self, prev, data):
+        """
+        `consume` is called when a model is wrapping data for each field.
+        """
+        return data
+
     def treat(self, data):
         """
         All field values will be passed through this method before being
@@ -213,13 +219,22 @@ class ReferenceField(Field):
         super().__init__(*args, **kwargs)
         self.model_ref_type = model_ref_type
 
+    def consume(self, prev, data):
+        if type(data) is dict:
+            return self.model_ref_type(**data)
+        elif type(data) is str:
+            setattr(prev, "id", data)
+            return prev
+        else:
+            return data
+
     def treat(self, data):
         if not hasattr(data, "id") or data is None:
             return data
         return data.id
 
     def show(self, data):
-        return self.model_ref_type(**data)
+        return data
 
     def validate(self, data):
         return data
@@ -231,6 +246,14 @@ class ReferenceListField(ReferenceField):
     be resolved once the field data is fetched.
     """
 
+    def consume(self, prev, data):
+        if data is None:
+            return []
+
+        consume = super().consume
+        return [consume(prev[i] if prev is not None else None, item)
+                for i, item in enumerate(data)]
+
     def treat(self, data):
         if data is None:
             return []
@@ -239,7 +262,7 @@ class ReferenceListField(ReferenceField):
     def show(self, data):
         if data is None:
             return []
-        return [self.model_ref_type(**item) for item in data]
+        return data
 
     def validate(self, data):
         data = data or []

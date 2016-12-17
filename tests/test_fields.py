@@ -118,8 +118,7 @@ def test_reference_field_treat():
 
 def test_reference_field_show():
     field = fields.ReferenceField(DummyModel)
-    data = {"title": "Test"}
-    model = field.show(data)
+    model = field.show(DummyModel(title="Test"))
     assert model.title == "Test"
 
 
@@ -131,7 +130,7 @@ def test_reference_list_field_treat():
 
 def test_reference_list_field_show():
     field = fields.ReferenceListField(DummyModel)
-    data = {"title": "Test"}
+    data = DummyModel(title="Test")
     models = field.show([data])
 
     for model in models:

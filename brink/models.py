@@ -118,11 +118,8 @@ class Model(object, metaclass=ModelBase):
         """
         for name, field in self.fields:
             try:
-                if isinstance(field, ReferenceField) \
-                        and type(data[name]) is dict:
-                    self._state[name] = field.model_ref_type(**data[name])
-                else:
-                    self._state[name] = data[name]
+                self._state[name] = field.consume(
+                    self._state.get(name, None), data[name])
             except KeyError:
                 self._state[name] = None
 
