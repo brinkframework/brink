@@ -4,5 +4,8 @@ services:
 build:
   steps:
     - script:
+      name: install pytest
+      code: pip install pytest pytest-asyncio
+    - script:
       name: run tests
       code: python setup.py test
