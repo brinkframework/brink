@@ -37,7 +37,7 @@ setup(
                       "rethinkdb", "inflection", "pycolor"],
 
     setup_requires=["pytest-runner"],
-    tests_require=["pytest", "pytest-asyncio"],
+    tests_require=["pytest"],
 
     extras_require={
         "dev": ["check-manifest"],
