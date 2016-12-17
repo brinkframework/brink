@@ -1,4 +1,5 @@
 import pytest
+import asyncio
 import rethinkdb as r
 
 from brink import fields, models
@@ -20,6 +21,13 @@ class Rabbit(models.Model):
 
 async def get_first(model):
     return (await model.all().limit(1).as_list())[0]
+
+
+@pytest.yield_fixture()
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.mark.asyncio
@@ -84,3 +92,8 @@ async def test_resolve_reference_list():
 async def test_destroy_table():
     await r.table_drop(Rabbit.table_name).run(await conn.get())
     await r.table_drop(Turtle.table_name).run(await conn.get())
+
+
+def test_async_close_loop(event_loop):
+    event_loop.close()
+    return 'ok'
