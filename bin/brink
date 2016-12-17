@@ -19,53 +19,7 @@ from brink.db import sync_model
 from brink.cli import (print_success, print_monkey, print_msg, print_done,
                        print_error)
 
-
-def rm_db_container():
-    print("Removing RethinkDB container...")
-    call(["docker", "stop", "rethinkdb"])
-    call(["docker", "rm", "rethinkdb"])
-
-
-def run_docker(args):
-    project_name = os.path.basename(os.getcwd())
-    link = []
-
-    if args.db:
-        print("🐳 Running RethinkDB in Docker...")
-        call([
-            "docker", "run",
-            "--name", "rethinkdb",
-            "-p", "8080:8080",
-            "-p", "28015:28015",
-            "-v", "%s/_db_data:/data" % os.getcwd(),
-            "-it",
-            "-d",
-            "rethinkdb"
-        ])
-
-        link = ["--link", "rethinkdb:rethinkdb"]
-
-    print("🐳 Running project `%s` in Docker...\n" % project_name)
-    call([
-        "docker", "run",
-        "--name", project_name,
-        "-p", "8888:8888",
-        "-v", "%s:/app" % os.getcwd(),
-        *link,
-        "--rm",
-        "-it",
-        project_name
-    ])
-
-    if args.db:
-        rm_db_container()
-
-
 def run(args):
-    if args.docker:
-        run_docker(args)
-        return
-
     try:
         config = __get_config()
         setattr(config, "DEBUG", args.debug)
@@ -74,17 +28,6 @@ def run(args):
         return
 
     run_server(config)
-
-
-def build(args):
-    project_name = os.path.basename(os.getcwd())
-
-    call([
-        "docker", "build",
-        "-t", project_name,
-        "."
-    ])
-
 
 def start_project(args):
     if args.name == "test":
@@ -168,18 +111,9 @@ parser = argparse.ArgumentParser(
 subparsers = parser.add_subparsers(help="Available commands")
 
 parser_run = subparsers.add_parser("run", help="Runs Brink project locally")
-parser_run.add_argument("--docker", action="store_true",
-                        help="Run inside Docker")
-parser_run.add_argument("--db", action="store_true",
-                        help="Run RethinkDB inside Docker and\
-                                link it to the Brink container")
 parser_run.add_argument("--debug", action="store_true",
                         help="Set DEBUG flag to True")
 parser_run.set_defaults(func=run)
-
-parser_build = subparsers.add_parser(
-    "build", help="Run a Docker build of the current project")
-parser_build.set_defaults(func=build)
 
 parser_syncdb = subparsers.add_parser(
     "sync-db", help="Creates tables and indexes in the database")
