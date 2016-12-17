@@ -33,7 +33,7 @@ def test_random_asyncio(loop):
     async def do_wait():
         await asyncio.sleep(5)
 
-    loop.run_until_complete(do_wait())
+    asyncio.get_event_loop().run_until_complete(do_wait())
 
 # def test_setup_table(loop):
 #     async def do_setup_table():
