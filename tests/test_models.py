@@ -33,16 +33,26 @@ def loop():
 
 def test_setup_table(loop):
     async def do_setup_table():
-        await r.table_create(Rabbit.table_name).run(await conn.get())
-        await r.table_create(Turtle.table_name).run(await conn.get())
+        try:
+            await r.table_create(Rabbit.table_name).run(await conn.get())
+            await r.table_create(Turtle.table_name).run(await conn.get())
+        except:
+            pass
+        finally:
+            await conn.close()
 
     loop.run_until_complete(do_setup_table())
 
 
 def test_destroy_table(loop):
     async def do_destroy_table():
-        await r.table_drop(Rabbit.table_name).run(await conn.get())
-        await r.table_drop(Turtle.table_name).run(await conn.get())
+        try:
+            await r.table_drop(Rabbit.table_name).run(await conn.get())
+            await r.table_drop(Turtle.table_name).run(await conn.get())
+        except:
+            pass
+        finally:
+            await conn.close()
 
     loop.run_until_complete(do_destroy_table())
 

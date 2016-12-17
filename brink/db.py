@@ -10,6 +10,7 @@ class Connection(object):
 
     def __init__(self):
         self.config = {}
+        self.connection = None
 
     def setup(self, config):
         """
@@ -20,10 +21,17 @@ class Connection(object):
         self.config = config
 
     async def get(self):
-        return await r.connect(
+        self.connection = self.connection or await r.connect(
             db=self.config.get("db", "test"),
             port=self.config.get("port", 28015)
         )
+
+        return self.connection
+
+    async def close(self):
+        conn = await self.get()
+        conn.close()
+        self.connection = None
 
 conn = Connection()
 
