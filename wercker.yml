@@ -1,0 +1,4 @@
+box: python:3.6
+build:
+  steps:
+    - python setup.py test
