@@ -19,6 +19,7 @@ from brink.db import sync_model
 from brink.cli import (print_success, print_monkey, print_msg, print_done,
                        print_error)
 
+
 def run(args):
     try:
         config = __get_config()
@@ -28,6 +29,7 @@ def run(args):
         return
 
     run_server(config)
+
 
 def start_project(args):
     if args.name == "test":
