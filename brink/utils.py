@@ -20,6 +20,9 @@ def get_config():
 def get_app_models(app):
     # TODO: Fix ugly workaround
     from brink.models import Model, ModelBase
-    module = importlib.import_module("%s.models" % app)
+    module_name = "%s.models" % app
+    module = importlib.import_module(module_name)
     return [model for _, model in module.__dict__.items()
-            if isinstance(model, ModelBase) and model is not Model]
+            if isinstance(model, ModelBase) and
+            model is not Model and
+            model.__module__ == module_name]
