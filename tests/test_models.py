@@ -25,10 +25,8 @@ async def get_first(model):
 
 @pytest.yield_fixture
 def loop():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    loop = asyncio.get_event_loop()
     yield loop
-    loop.close()
 
 
 def test_random_asyncio(loop):
